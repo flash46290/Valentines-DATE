@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Valentine?</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #ffd6e8, #fff0f6);
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 3rem;
+      color: #c9184a;
+      margin-bottom: 40px;
+    }
+
+    .buttons {
+      position: relative;
+      height: 120px;
+    }
+
+    #yes {
+      font-size: 2.2rem;
+      padding: 15px 40px;
+      background-color: #ff4d6d;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-right: 20px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
+    #no {
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      background-color: #adb5bd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      position: absolute;
+    }
+
+    /* YAAYYY screen */
+    .yay {
+      display: none;
+      font-size: 4rem;
+      color: #ff4d6d;
+      position: relative;
+    }
+
+    .confetti {
+      position: absolute;
+      top: 50%;
+      font-size: 2.5rem;
+      animation: pop 1.2s infinite ease-in-out;
+    }
+
+    .confetti.left {
+      left: -80px;
+    }
+
+    .confetti.right {
+      right: -80px;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.4) rotate(20deg); opacity: 0.9; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    /* Floating hearts */
+    .heart {
+      position: absolute;
+      color: rgba(255, 77, 109, 0.25);
+      font-size: 1.5rem;
+      animation: float 8s linear infinite;
+    }
+
+    @keyframes float {
+      from {
+        transform: translateY(100vh);
+      }
+      to {
+        transform: translateY(-10vh);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="main">
+    <h1>Will you be my Valentine? 💖</h1>
+    <div class="buttons">
+      <button id="yes">Yes</button>
+      <button id="no">no</button>
+    </div>
+  </div>
+
+  <div class="container yay" id="yayScreen">
+    YAAYYY 🎉
+    <div class="confetti left">🎉🎊</div>
+    <div class="confetti right">🎊🎉</div>
+  </div>
+
+  <script>
+    const noBtn = document.getElementById('no');
+    const yesBtn = document.getElementById('yes');
+    const main = document.getElementById('main');
+    const yayScreen = document.getElementById('yayScreen');
+
+    let speedLevel = parseInt(localStorage.getItem('noSpeed')) || 1;
+    let dx = 1.2 * speedLevel;
+    let dy = 1.2 * speedLevel;
+
+    let x = 100;
+    let y = 20;
+
+    function moveNo() {
+      const maxX = window.innerWidth - noBtn.offsetWidth;
+      const maxY = window.innerHeight - noBtn.offsetHeight;
+
+      x += dx;
+      y += dy;
+
+      if (x <= 0 || x >= maxX) dx *= -1;
+      if (y <= 0 || y >= maxY) dy *= -1;
+
+      noBtn.style.left = x + 'px';
+      noBtn.style.top = y + 'px';
+
+      requestAnimationFrame(moveNo);
+    }
+
+    moveNo();
+
+    noBtn.addEventListener('click', () => {
+      localStorage.setItem('noSpeed', speedLevel + 1);
+      location.reload();
+    });
+
+    yesBtn.addEventListener('click', () => {
+      main.style.display = 'none';
+      yayScreen.style.display = 'block';
+      localStorage.removeItem('noSpeed');
+    });
+
+    // Hearts background
+    for (let i = 0; i < 20; i++) {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.textContent = '❤';
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.animationDuration = 6 + Math.random() * 6 + 's';
+      heart.style.fontSize = 1 + Math.random() * 1.5 + 'rem';
+      document.body.appendChild(heart);
+    }
+  </script>
+</body>
+</html>
