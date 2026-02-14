@@ -30,7 +30,20 @@
   h1 {
     font-size: clamp(1.8rem, 5vw, 3rem);
     color: #c9184a;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
+  }
+
+  .message {
+    font-size: 1.2rem;
+    color: #9d0208;
+    margin-bottom: 10px;
+    min-height: 30px;
+  }
+
+  .counter {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 20px;
   }
 
   .buttons {
@@ -61,12 +74,10 @@
     position: fixed;
   }
 
-  /* Improve mobile tap responsiveness */
   #no, #yes {
     touch-action: manipulation;
   }
 
-  /* YAAY screen */
   .yay {
     display: none;
     font-size: clamp(2rem, 6vw, 4rem);
@@ -90,10 +101,9 @@
     100% { transform: scale(1) rotate(0deg); }
   }
 
-  /* Floating hearts */
-  .heart {
+  .floating {
     position: absolute;
-    color: rgba(255, 77, 109, 0.25);
+    opacity: 0.25;
     animation: float linear infinite;
   }
 
@@ -107,6 +117,8 @@
 
 <div class="container" id="main">
   <h1>Will you be my Valentine? 💖</h1>
+  <div class="message" id="message"></div>
+  <div class="counter" id="counter"></div>
   <div class="buttons">
     <button id="yes">Yes</button>
     <button id="no">No</button>
@@ -124,31 +136,55 @@
   const yesBtn = document.getElementById('yes');
   const main = document.getElementById('main');
   const yayScreen = document.getElementById('yayScreen');
+  const messageEl = document.getElementById('message');
+  const counterEl = document.getElementById('counter');
 
-  let speedLevel = parseInt(localStorage.getItem('noSpeed')) || 4;
-  let dx = 1.5 * speedLevel;
-  let dy = 1.5 * speedLevel;
-
+  let noCount = parseInt(localStorage.getItem("noCount")) || 0;
+  let dx = 3;
+  let dy = 3;
   let x = 0;
   let y = 0;
   let maxX = 0;
   let maxY = 0;
   let isPaused = false;
+  let impossibleMode = false;
+
+  const wrongMessages = [
+    "Are you sure? 😏",
+    "You're making a mistake 👀",
+    "That doesn't feel right 🤨",
+    "Hmm... try again 😌",
+    "Really? Think again 💭"
+  ];
+
+  /* SOUND EFFECTS */
+  const sounds = [
+    new Audio("https://www.myinstants.com/media/sounds/cartoon-boing.mp3"),
+    new Audio("https://www.myinstants.com/media/sounds/fail-trombone.mp3"),
+    new Audio("https://www.myinstants.com/media/sounds/vine-boom.mp3")
+  ];
+
+  function playRandomSound() {
+    const s = sounds[Math.floor(Math.random() * sounds.length)];
+    s.currentTime = 0;
+    s.play();
+  }
+
+  function vibrate() {
+    if (navigator.vibrate) {
+      navigator.vibrate(150);
+    }
+  }
 
   function updateBounds() {
     maxX = window.innerWidth - noBtn.offsetWidth;
     maxY = window.innerHeight - noBtn.offsetHeight;
-
-    x = Math.min(Math.max(x, 0), maxX);
-    y = Math.min(Math.max(y, 0), maxY);
   }
 
   function initPosition() {
     updateBounds();
     x = Math.random() * maxX;
     y = Math.random() * maxY;
-    noBtn.style.left = x + "px";
-    noBtn.style.top = y + "px";
   }
 
   function moveNo() {
@@ -156,64 +192,63 @@
       x += dx;
       y += dy;
 
-      if (x <= 0 || x >= maxX) {
-        dx *= -1;
-        x = Math.min(Math.max(x, 0), maxX);
-      }
-
-      if (y <= 0 || y >= maxY) {
-        dy *= -1;
-        y = Math.min(Math.max(y, 0), maxY);
-      }
+      if (x <= 0 || x >= maxX) dx *= -1;
+      if (y <= 0 || y >= maxY) dy *= -1;
 
       noBtn.style.left = x + "px";
       noBtn.style.top = y + "px";
-    }
 
+      if (impossibleMode) {
+        if (Math.random() < 0.02) {
+          dx = (Math.random() * 8) - 4;
+          dy = (Math.random() * 8) - 4;
+        }
+      }
+    }
     requestAnimationFrame(moveNo);
   }
 
-  /* Pointer Events (Mouse + Touch + Pen) */
-  noBtn.addEventListener("pointerdown", () => isPaused = true);
-  noBtn.addEventListener("pointerup", () => isPaused = false);
-  noBtn.addEventListener("pointercancel", () => isPaused = false);
-
-  /* No button click */
   noBtn.addEventListener("click", () => {
-    isPaused = true;
-    noBtn.style.display = "none";
+    noCount++;
+    localStorage.setItem("noCount", noCount);
 
-    const message = document.createElement("h2");
-    message.textContent = "Wrong Answer. Start Again 😈";
-    message.style.color = "#c9184a";
-    message.style.marginTop = "20px";
-    main.appendChild(message);
+    playRandomSound();
+    vibrate();
 
-    localStorage.setItem("noSpeed", speedLevel + 1);
+    messageEl.textContent = wrongMessages[noCount % wrongMessages.length];
+    counterEl.textContent = `You're on your ${noCount}${getOrdinal(noCount)} bad decision 😈`;
 
-    setTimeout(() => location.reload(), 1800);
+    if (noCount >= 3) startFloatingYes();
+    if (noCount >= 10) impossibleMode = true;
   });
 
-  /* Yes button */
+  function getOrdinal(n) {
+    if (n % 10 == 1 && n % 100 != 11) return "st";
+    if (n % 10 == 2 && n % 100 != 12) return "nd";
+    if (n % 10 == 3 && n % 100 != 13) return "rd";
+    return "th";
+  }
+
   yesBtn.addEventListener("click", () => {
     main.style.display = "none";
     yayScreen.style.display = "block";
-    localStorage.removeItem("noSpeed");
+    localStorage.removeItem("noCount");
   });
 
-  /* Handle resize & orientation changes */
-  window.addEventListener("resize", updateBounds);
-
-  /* Floating hearts (lightweight) */
-  for (let i = 0; i < 20; i++) {
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.textContent = "❤";
-    heart.style.left = Math.random() * 100 + "vw";
-    heart.style.fontSize = (1 + Math.random() * 1.5) + "rem";
-    heart.style.animationDuration = (6 + Math.random() * 6) + "s";
-    document.body.appendChild(heart);
+  function startFloatingYes() {
+    if (document.querySelectorAll(".floating").length > 0) return;
+    for (let i = 0; i < 25; i++) {
+      const el = document.createElement("div");
+      el.className = "floating";
+      el.textContent = "YES";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.fontSize = (1 + Math.random() * 1.5) + "rem";
+      el.style.animationDuration = (6 + Math.random() * 6) + "s";
+      document.body.appendChild(el);
+    }
   }
+
+  window.addEventListener("resize", updateBounds);
 
   initPosition();
   moveNo();
