@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Valentine?</title>
 <style>
-*{box-sizing:border-box;font-family:Arial,sans-serif;}
+*{box-sizing:border-box;font-family:Arial,sans-serif;margin:0;padding:0;}
 body{
   margin:0;
   height:100vh;
@@ -51,11 +51,24 @@ h1{font-size:clamp(1.8rem,5vw,3rem);color:#c9184a;margin-bottom:20px;}
 .confetti.left{left:-80px;}
 .confetti.right{right:-80px;}
 @keyframes pop{0%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.4) rotate(20deg);}100%{transform:scale(1) rotate(0deg);}}
-.floating{position:absolute;opacity:0.25;animation:float linear infinite;font-size:1.2rem;cursor:pointer;}
+.floating{position:absolute;opacity:0.25;animation:float linear infinite;font-size:1.2rem;cursor:pointer;pointer-events:auto;}
 @keyframes float{from{transform:translateY(100vh);}to{transform:translateY(-10vh);}}
+#sheYes{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  display:none;
+  max-width:80%;
+  max-height:80%;
+  border-radius:20px;
+  box-shadow:0 0 20px rgba(0,0,0,0.3);
+  z-index:999;
+}
 </style>
 </head>
 <body>
+
 <div class="container" id="main">
   <h1>Will you be my Valentine? 💖</h1>
   <div class="message" id="message"></div>
@@ -66,11 +79,15 @@ h1{font-size:clamp(1.8rem,5vw,3rem);color:#c9184a;margin-bottom:20px;}
     <button id="no">No</button>
   </div>
 </div>
+
+<img id="sheYes" src="https://i.imgur.com/0RmBzYF.png" alt="She said Yes">
+
 <div class="container yay" id="yayScreen">
   YAAYYY 🎉
   <div class="confetti left">🎉🎊</div>
   <div class="confetti right">🎊🎉</div>
 </div>
+
 <script>
 const noBtn=document.getElementById('no');
 const yesBtn=document.getElementById('yes');
@@ -79,11 +96,14 @@ const yayScreen=document.getElementById('yayScreen');
 const messageEl=document.getElementById('message');
 const counterEl=document.getElementById('counter');
 const countdownEl=document.getElementById('countdown');
+const sheYes=document.getElementById('sheYes');
 
 let noCount=parseInt(localStorage.getItem("noCount"))||0;
+let swapCount=0;
 let dx=2,dy=2,x=0,y=0,maxX=0,maxY=0;
 let impossibleMode=false,countdown=null,countdownTime=10;
 let reverseActive=false;
+let floatingYesSizeFactor=1;
 
 const wrongMessages=["Are you sure? 😏","You're making a mistake 👀","That doesn't feel right 🤨","Hmm... try again 😌","Really? Think again 💭"];
 const sounds=[
@@ -91,12 +111,12 @@ const sounds=[
   new Audio("https://www.myinstants.com/media/sounds/fail-trombone.mp3"),
   new Audio("https://www.myinstants.com/media/sounds/vine-boom.mp3")
 ];
+
 function playRandomSound(){ const s=sounds[Math.floor(Math.random()*sounds.length)]; s.currentTime=0;s.play();}
 function vibrate(){if(navigator.vibrate) navigator.vibrate(150);}
 function updateBounds(){ maxX=window.innerWidth-noBtn.offsetWidth; maxY=window.innerHeight-noBtn.offsetHeight; }
 function initPosition(){updateBounds(); x=Math.random()*maxX; y=Math.random()*maxY;}
 function moveNo(){ x+=dx; y+=dy; if(x<=0||x>=maxX) dx*=-1; if(y<=0||y>=maxY) dy*=-1; noBtn.style.left=x+"px"; noBtn.style.top=y+"px"; requestAnimationFrame(moveNo);}
-
 function getOrdinal(n){ if(n%10==1&&n%100!=11)return"st"; if(n%10==2&&n%100!=12)return"nd"; if(n%10==3&&n%100!=13)return"rd"; return"th"; }
 
 function spawnChaosParticles(num,emojiList){
@@ -108,9 +128,7 @@ function spawnChaosParticles(num,emojiList){
     el.style.fontSize=(1+Math.random()*2)+"rem";
     el.style.animationDuration=(3+Math.random()*5)+"s";
     document.body.appendChild(el);
-
     if(reverseActive){
-      // Floating YES click triggers celebration
       el.addEventListener("click",()=>celebrate());
     }
   }
@@ -124,36 +142,38 @@ function startFloatingYes(){
     el.className="floating yesFloating";
     el.textContent="YES";
     el.style.left=Math.random()*100+"vw";
-    el.style.fontSize=(1+Math.random()*1.5)+"rem";
+    el.style.fontSize=`${1+Math.random()*1.5* floatingYesSizeFactor}rem`;
     el.style.animationDuration=(6+Math.random()*6)+"s";
     document.body.appendChild(el);
-
-    // Floating YES click triggers celebration in reverse mode
     el.addEventListener("click",()=>celebrate());
   }
 }
 
 function celebrate(){
-  // Remove floating yes/memes
   document.querySelectorAll(".floating").forEach(el=>el.remove());
-
-  // Show yay
   main.style.display="none";
   yayScreen.style.display="block";
+  countdownEl.textContent="";
+  let confettiInterval=setInterval(()=>{
+    for(let i=0;i<20;i++){
+      const conf=document.createElement("div");
+      conf.className="confetti";
+      conf.style.left=Math.random()*window.innerWidth+"px";
+      conf.style.top=Math.random()*window.innerHeight+"px";
+      conf.textContent=["🎉","🎊","✨","💖"][Math.floor(Math.random()*4)];
+      document.body.appendChild(conf);
+    }
+  },200);
 
-  // Spawn confetti
-  for(let i=0;i<20;i++){
-    const conf=document.createElement("div");
-    conf.className="confetti";
-    conf.style.left=Math.random()*window.innerWidth+"px";
-    conf.style.top=Math.random()*window.innerHeight+"px";
-    conf.textContent=["🎉","🎊","✨","💖"][Math.floor(Math.random()*4)];
-    document.body.appendChild(conf);
-  }
   const cheer=new Audio("https://www.myinstants.com/media/sounds/tada-fanfare.mp3");
   cheer.play();
+
+  setTimeout(()=>{
+    clearInterval(confettiInterval);
+    sheYes.style.display="block";
+  },10000); // celebration for 10 seconds
+
   localStorage.removeItem("noCount");
-  countdownEl.textContent="";
 }
 
 // NO click logic
@@ -173,13 +193,16 @@ noBtn.addEventListener("click",()=>{
   x=Math.random()*maxX; y=Math.random()*maxY;
   noBtn.style.left=x+"px"; noBtn.style.top=y+"px";
 
-  // Reverse psychology after 5 NOs
-  if(noCount===5 && !reverseActive){
-    reverseActive=true;
-    if(Math.random()<0.5){
-      [yesBtn.textContent,noBtn.textContent]=["No 🤯","Yes 😈"];
-    }
-    // Start countdown pressure
+  // Hard swap YES/NO every 3 NO clicks
+  swapCount++;
+  if(swapCount%3===0){
+    [yesBtn.textContent,noBtn.textContent]=[noBtn.textContent,yesBtn.textContent];
+    reverseActive=!reverseActive;
+    floatingYesSizeFactor=reverseActive?1.5:1;
+  }
+
+  // Start countdown after 10 NOs
+  if(noCount===10){
     countdownTime=10;
     countdownEl.textContent=`⏰ ${countdownTime}s left`;
     countdown=setInterval(()=>{
@@ -188,22 +211,14 @@ noBtn.addEventListener("click",()=>{
       if(countdownTime<0){
         clearInterval(countdown);
         countdownEl.textContent="Too late! 😵";
-        spawnChaosParticles(20,["💖","💋","🔥"]);
+        spawnChaosParticles(50,["💖","💋","💌","💏","💞","💕","💓","💗","💘"]);
+        document.body.style.background=`linear-gradient(${Math.random()*360}deg,#ff4d6d,#ffd6e8,#ffafcc)`;
       }
     },1000);
   }
 
-  // Floating YES after 3 NOs (even after reverse)
   if(noCount>=3) startFloatingYes();
 
-  // Meme chaos after 10 NOs
-  if(noCount>=10 && !impossibleMode){
-    impossibleMode=true;
-    spawnChaosParticles(50,["💖","💋","💌","💏","💞","💕","💓","💗","💘"]);
-    document.body.style.background=`linear-gradient(${Math.random()*360}deg,#ff4d6d,#ffd6e8,#ffafcc)`;
-  }
-
-  // Floating YES grows faster if reverse active
   if(reverseActive){
     document.querySelectorAll(".yesFloating").forEach(el=>{
       const size=parseFloat(el.style.fontSize)||1;
@@ -212,7 +227,6 @@ noBtn.addEventListener("click",()=>{
   }
 });
 
-// YES click logic
 yesBtn.addEventListener("click",()=>celebrate());
 
 window.addEventListener("resize",updateBounds);
