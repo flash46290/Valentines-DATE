@@ -6,83 +6,83 @@
 <title>Valentine?</title>
 
 <style>
-  * { box-sizing: border-box; font-family: Arial, sans-serif; }
-  body {
-    margin:0;
-    height:100vh;
-    background: linear-gradient(135deg,#ffd6e8,#fff0f6);
-    overflow:hidden;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-  }
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+body {
+  margin:0;
+  height:100vh;
+  background: linear-gradient(135deg,#ffd6e8,#fff0f6);
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-  .container { text-align:center; position:relative; padding:20px; }
+.container { text-align:center; position:relative; padding:20px; }
 
-  h1 { font-size:clamp(1.8rem,5vw,3rem); color:#c9184a; margin-bottom:20px; }
+h1 { font-size:clamp(1.8rem,5vw,3rem); color:#c9184a; margin-bottom:20px; }
 
-  .message { font-size:1.2rem; color:#9d0208; min-height:30px; margin-bottom:10px; }
+.message { font-size:1.2rem; color:#9d0208; min-height:30px; margin-bottom:10px; }
 
-  .counter { font-size:0.9rem; color:#6c757d; margin-bottom:20px; }
+.counter { font-size:0.9rem; color:#6c757d; margin-bottom:20px; }
 
-  .buttons { position:relative; height:120px; }
+.buttons { position:relative; height:120px; }
 
-  #yes {
-    font-size:clamp(1.2rem,4vw,2.2rem);
-    padding:15px 40px;
-    background-color:#ff4d6d;
-    color:white;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    margin-right:20px;
-    box-shadow:0 6px 15px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
-  }
+#yes {
+  font-size:clamp(1.2rem,4vw,2.2rem);
+  padding:15px 40px;
+  background-color:#ff4d6d;
+  color:white;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin-right:20px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+}
 
-  #no {
-    font-size:0.9rem;
-    padding:6px 12px;
-    background-color:#adb5bd;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    position:fixed;
-    transition: transform 0.2s;
-  }
+#no {
+  font-size:0.9rem;
+  padding:6px 12px;
+  background-color:#adb5bd;
+  color:white;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  position:fixed;
+  transition: transform 0.2s;
+}
 
-  #no,#yes { touch-action: manipulation; }
+#no,#yes { touch-action: manipulation; }
 
-  .yay {
-    display:none;
-    font-size:clamp(2rem,6vw,4rem);
-    color:#ff4d6d;
-    position:relative;
-  }
+.yay {
+  display:none;
+  font-size:clamp(2rem,6vw,4rem);
+  color:#ff4d6d;
+  position:relative;
+}
 
-  .confetti {
-    position:absolute;
-    top:50%;
-    font-size:2.5rem;
-    animation:pop 1.2s infinite ease-in-out;
-  }
-  .confetti.left { left:-80px; }
-  .confetti.right { right:-80px; }
+.confetti {
+  position:absolute;
+  top:50%;
+  font-size:2.5rem;
+  animation:pop 1.2s infinite ease-in-out;
+}
+.confetti.left { left:-80px; }
+.confetti.right { right:-80px; }
 
-  @keyframes pop { 0%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.4) rotate(20deg);}100%{transform:scale(1) rotate(0deg);} }
+@keyframes pop { 0%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.4) rotate(20deg);}100%{transform:scale(1) rotate(0deg);} }
 
-  .floating {
-    position:absolute;
-    font-size:1.2rem;
-    color:#ff4d6d;
-    opacity:0.25;
-    animation:float linear infinite;
-    cursor:pointer;
-    pointer-events:auto;
-  }
+.floating {
+  position:absolute;
+  font-size:1.2rem;
+  color:#ff4d6d;
+  opacity:0.25;
+  animation:float linear infinite;
+  cursor:pointer;
+  pointer-events:auto;
+}
 
-  @keyframes float { from { transform:translateY(100vh); } to { transform:translateY(-10vh); } }
+@keyframes float { from { transform:translateY(100vh); } to { transform:translateY(-10vh); } }
 
 </style>
 </head>
@@ -113,10 +113,16 @@ const messageEl = document.getElementById('message');
 const counterEl = document.getElementById('counter');
 
 let noCount = parseInt(localStorage.getItem("noCount"))||0;
-let dx = 2, dy = 2;
+
+// --- Controlled Speed ---
+let baseSpeed = 0.8;        // initial speed (slow)
+let speedIncrement = 0.3;   // increase per NO click
+let dx = baseSpeed, dy = baseSpeed;
+
 let x = 0, y = 0, maxX = 0, maxY = 0;
 let floatingYesSizeFactor = 1;
 
+// --- Escalating messages ---
 const wrongMessages = [
   "Are you sure? 😏",
   "You're making a mistake 👀",
@@ -125,13 +131,13 @@ const wrongMessages = [
   "Oops! Not this one 💭"
 ];
 
+// --- Sound effects ---
 const sounds = [
   new Audio("https://www.myinstants.com/media/sounds/cartoon-boing.mp3"),
   new Audio("https://www.myinstants.com/media/sounds/fail-trombone.mp3"),
   new Audio("https://www.myinstants.com/media/sounds/vine-boom.mp3")
 ];
 let soundIndex = 0;
-
 function playNextSound(){
   const s = sounds[soundIndex];
   s.currentTime = 0; s.play();
@@ -199,7 +205,7 @@ function celebrate(){
   localStorage.removeItem("noCount");
 }
 
-/* NO click logic */
+// --- NO click logic ---
 noBtn.addEventListener("click",()=>{
   noCount++;
   localStorage.setItem("noCount", noCount);
@@ -218,10 +224,11 @@ noBtn.addEventListener("click",()=>{
   // YES grows slightly
   yesBtn.style.transform = `scale(${1+noCount*0.05})`;
 
-  // Increase speed gradually
-  dx *= 1.05; dy *= 1.05;
+  // Gradually increase speed
+  dx += speedIncrement;
+  dy += speedIncrement;
 
-  // Teleport slightly for chaotic effect
+  // Teleport slightly for chaos
   x = Math.random()*maxX; y = Math.random()*maxY;
   noBtn.style.left = x+"px";
   noBtn.style.top = y+"px";
@@ -236,7 +243,7 @@ noBtn.addEventListener("click",()=>{
   });
 });
 
-/* YES click */
+// --- YES click ---
 yesBtn.addEventListener("click",()=>celebrate());
 
 window.addEventListener("resize", updateBounds);
