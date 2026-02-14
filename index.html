@@ -25,6 +25,8 @@ h1 { font-size:clamp(1.8rem,5vw,3rem); color:#c9184a; margin-bottom:20px; }
 
 .counter { font-size:0.9rem; color:#6c757d; margin-bottom:20px; }
 
+.warning { font-size:1rem; color:#d00000; min-height:25px; margin-bottom:10px; font-weight:bold; }
+
 .buttons { position:relative; height:120px; }
 
 #yes {
@@ -92,6 +94,7 @@ h1 { font-size:clamp(1.8rem,5vw,3rem); color:#c9184a; margin-bottom:20px; }
   <h1>Will you be my Valentine? 💖</h1>
   <div class="message" id="message"></div>
   <div class="counter" id="counter"></div>
+  <div class="warning" id="warning"></div>
   <div class="buttons">
     <button id="yes">Yes</button>
     <button id="no">No</button>
@@ -99,7 +102,7 @@ h1 { font-size:clamp(1.8rem,5vw,3rem); color:#c9184a; margin-bottom:20px; }
 </div>
 
 <div class="container yay" id="yayScreen">
-  YAAYYY 🎉
+  <h1 id="celebrationMessage">Yayyy, She said YES!!! 🎉</h1>
   <div class="confetti left">🎉🎊</div>
   <div class="confetti right">🎊🎉</div>
 </div>
@@ -111,12 +114,13 @@ const main = document.getElementById('main');
 const yayScreen = document.getElementById('yayScreen');
 const messageEl = document.getElementById('message');
 const counterEl = document.getElementById('counter');
+const warningEl = document.getElementById('warning');
 
 let noCount = parseInt(localStorage.getItem("noCount"))||0;
 
-// --- Controlled Speed ---
-let baseSpeed = 0.8;        // initial speed (slow)
-let speedIncrement = 0.3;   // increase per NO click
+// --- Controlled Multiplicative Speed ---
+let baseSpeed = 0.5;       // start very slow
+let speedMultiplier = 1.05; // multiply per NO click
 let dx = baseSpeed, dy = baseSpeed;
 
 let x = 0, y = 0, maxX = 0, maxY = 0;
@@ -130,6 +134,12 @@ const wrongMessages = [
   "Really? Try again 😌",
   "Oops! Not this one 💭"
 ];
+
+// --- Countdown warnings before 10th NO ---
+const countdownWarnings = {
+  8: "Careful... only 2 NOs left 😈",
+  9: "Last chance! 1 NO left 😱"
+};
 
 // --- Sound effects ---
 const sounds = [
@@ -188,12 +198,17 @@ function celebrate(){
   main.style.display="none";
   yayScreen.style.display="block";
 
+  // Centered celebration overload around the message
+  const messageEl = document.getElementById("celebrationMessage");
+  messageEl.style.position = "relative";
+  messageEl.style.zIndex = 1000;
+
   let confettiInterval = setInterval(()=>{
     for(let i=0;i<20;i++){
       const conf=document.createElement("div");
       conf.className="confetti";
-      conf.style.left=Math.random()*window.innerWidth+"px";
-      conf.style.top=Math.random()*window.innerHeight+"px";
+      conf.style.left=(window.innerWidth/2 + (Math.random()-0.5)*400)+"px";
+      conf.style.top=(window.innerHeight/2 + (Math.random()-0.5)*200)+"px";
       conf.textContent=["🎉","🎊","✨","💖"][Math.floor(Math.random()*4)];
       document.body.appendChild(conf);
     }
@@ -219,14 +234,21 @@ noBtn.addEventListener("click",()=>{
   // Persistence counter
   counterEl.textContent = `You're on your ${noCount}${["st","nd","rd"][noCount%10-1]||"th"} bad decision 😈`;
 
+  // Show countdown warning if approaching 10th NO
+  if(countdownWarnings[noCount]){
+    warningEl.textContent = countdownWarnings[noCount];
+  } else {
+    warningEl.textContent = "";
+  }
+
   // NO scales down and spins
   noBtn.style.transform = `scale(${Math.max(0.5,1-noCount*0.05)}) rotate(${Math.random()*360}deg)`;
   // YES grows slightly
   yesBtn.style.transform = `scale(${1+noCount*0.05})`;
 
-  // Gradually increase speed
-  dx += speedIncrement;
-  dy += speedIncrement;
+  // Multiplicative speed increase
+  dx *= speedMultiplier;
+  dy *= speedMultiplier;
 
   // Teleport slightly for chaos
   x = Math.random()*maxX; y = Math.random()*maxY;
@@ -241,6 +263,11 @@ noBtn.addEventListener("click",()=>{
     const size = parseFloat(el.style.fontSize)||1;
     el.style.fontSize = `${size*1.03}rem`;
   });
+
+  // Only trigger celebration overload after 10 NOs (hardcoded)
+  if(noCount === 10){
+    celebrate();
+  }
 });
 
 // --- YES click ---
