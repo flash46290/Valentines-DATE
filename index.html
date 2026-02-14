@@ -1,224 +1,223 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Valentine?</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Arial', sans-serif;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Valentine?</title>
 
-    body {
-      margin: 0;
-      height: 100vh;
-      background: linear-gradient(135deg, #ffd6e8, #fff0f6);
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+<style>
+  * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
 
-    .container {
-      text-align: center;
-      position: relative;
-    }
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #ffd6e8, #fff0f6);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 
-    h1 {
-      font-size: 3rem;
-      color: #c9184a;
-      margin-bottom: 40px;
-    }
+  .container {
+    text-align: center;
+    position: relative;
+    padding: 20px;
+  }
 
-    .buttons {
-      position: relative;
-      height: 120px;
-    }
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: #c9184a;
+    margin-bottom: 40px;
+  }
 
-    #yes {
-      font-size: 2.2rem;
-      padding: 15px 40px;
-      background-color: #ff4d6d;
-      color: white;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-right: 20px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
+  .buttons {
+    position: relative;
+    height: 120px;
+  }
 
-    #no {
-      font-size: 0.9rem;
-      padding: 6px 12px;
-      background-color: #adb5bd;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      position: fixed; /* CHANGE THIS */
-    }
+  #yes {
+    font-size: clamp(1.2rem, 4vw, 2.2rem);
+    padding: 15px 40px;
+    background-color: #ff4d6d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-right: 20px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
 
+  #no {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    background-color: #adb5bd;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    position: fixed;
+  }
 
-    /* YAAYYY screen */
-    .yay {
-      display: none;
-      font-size: 4rem;
-      color: #ff4d6d;
-      position: relative;
-    }
+  /* Improve mobile tap responsiveness */
+  #no, #yes {
+    touch-action: manipulation;
+  }
 
-    .confetti {
-      position: absolute;
-      top: 50%;
-      font-size: 2.5rem;
-      animation: pop 1.2s infinite ease-in-out;
-    }
+  /* YAAY screen */
+  .yay {
+    display: none;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: #ff4d6d;
+    position: relative;
+  }
 
-    .confetti.left {
-      left: -80px;
-    }
+  .confetti {
+    position: absolute;
+    top: 50%;
+    font-size: 2.5rem;
+    animation: pop 1.2s infinite ease-in-out;
+  }
 
-    .confetti.right {
-      right: -80px;
-    }
+  .confetti.left { left: -80px; }
+  .confetti.right { right: -80px; }
 
-    @keyframes pop {
-      0% { transform: scale(1) rotate(0deg); opacity: 1; }
-      50% { transform: scale(1.4) rotate(20deg); opacity: 0.9; }
-      100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    }
+  @keyframes pop {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.4) rotate(20deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
 
-    /* Floating hearts */
-    .heart {
-      position: absolute;
-      color: rgba(255, 77, 109, 0.25);
-      font-size: 1.5rem;
-      animation: float 8s linear infinite;
-    }
+  /* Floating hearts */
+  .heart {
+    position: absolute;
+    color: rgba(255, 77, 109, 0.25);
+    animation: float linear infinite;
+  }
 
-    @keyframes float {
-      from {
-        transform: translateY(100vh);
-      }
-      to {
-        transform: translateY(-10vh);
-      }
-    }
-  </style>
+  @keyframes float {
+    from { transform: translateY(100vh); }
+    to { transform: translateY(-10vh); }
+  }
+</style>
 </head>
 <body>
 
-  <div class="container" id="main">
-    <h1>Will you be my Valentine? 💖</h1>
-    <div class="buttons">
-      <button id="yes">Yes</button>
-      <button id="no">no</button>
-    </div>
+<div class="container" id="main">
+  <h1>Will you be my Valentine? 💖</h1>
+  <div class="buttons">
+    <button id="yes">Yes</button>
+    <button id="no">No</button>
   </div>
+</div>
 
-  <div class="container yay" id="yayScreen">
-    YAAYYY 🎉
-    <div class="confetti left">🎉🎊</div>
-    <div class="confetti right">🎊🎉</div>
-  </div>
+<div class="container yay" id="yayScreen">
+  YAAYYY 🎉
+  <div class="confetti left">🎉🎊</div>
+  <div class="confetti right">🎊🎉</div>
+</div>
 
-  <script>
-    const noBtn = document.getElementById('no');
-    const yesBtn = document.getElementById('yes');
-    const main = document.getElementById('main');
-    const yayScreen = document.getElementById('yayScreen');
+<script>
+  const noBtn = document.getElementById('no');
+  const yesBtn = document.getElementById('yes');
+  const main = document.getElementById('main');
+  const yayScreen = document.getElementById('yayScreen');
 
-    let speedLevel = parseInt(localStorage.getItem('noSpeed')) || 1;
-    let dx = 1.2 * speedLevel;
-    let dy = 1.2 * speedLevel;
+  let speedLevel = parseInt(localStorage.getItem('noSpeed')) || 1;
+  let dx = 1.5 * speedLevel;
+  let dy = 1.5 * speedLevel;
 
-    let x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-    let y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+  let x = 0;
+  let y = 0;
+  let maxX = 0;
+  let maxY = 0;
+  let isPaused = false;
 
-    let isPaused = false;
+  function updateBounds() {
+    maxX = window.innerWidth - noBtn.offsetWidth;
+    maxY = window.innerHeight - noBtn.offsetHeight;
 
-    noBtn.addEventListener('mouseenter', () => {
-      isPaused = true;
-    });
-    
-    noBtn.addEventListener('mouseleave', () => {
-      isPaused = false;
-    });
+    x = Math.min(Math.max(x, 0), maxX);
+    y = Math.min(Math.max(y, 0), maxY);
+  }
 
+  function initPosition() {
+    updateBounds();
+    x = Math.random() * maxX;
+    y = Math.random() * maxY;
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+  }
 
+  function moveNo() {
+    if (!isPaused) {
+      x += dx;
+      y += dy;
 
-    function moveNo() {
-      const maxX = window.innerWidth - noBtn.offsetWidth;
-      const maxY = window.innerHeight - noBtn.offsetHeight;
-    
-      if (!isPaused) {
-        x += dx;
-        y += dy;
-    
-        if (x <= 0) {
-          x = 0;
-          dx *= -1;
-        }
-    
-        if (x >= maxX) {
-          x = maxX;
-          dx *= -1;
-        }
-    
-        if (y <= 0) {
-          y = 0;
-          dy *= -1;
-        }
-    
-        if (y >= maxY) {
-          y = maxY;
-          dy *= -1;
-        }
+      if (x <= 0 || x >= maxX) {
+        dx *= -1;
+        x = Math.min(Math.max(x, 0), maxX);
       }
-    
-      noBtn.style.left = x + 'px';
-      noBtn.style.top = y + 'px';
-    
-      requestAnimationFrame(moveNo);
+
+      if (y <= 0 || y >= maxY) {
+        dy *= -1;
+        y = Math.min(Math.max(y, 0), maxY);
+      }
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
     }
 
-    moveNo();
+    requestAnimationFrame(moveNo);
+  }
 
-    noBtn.addEventListener('click', () => {
-      isPaused = true;
-      noBtn.style.display = 'none';
-    
-      const message = document.createElement('h2');
-      message.textContent = "Wrong Answer. Start Again 😈";
-      message.style.color = "#c9184a";
-      message.style.marginTop = "20px";
-    
-      document.getElementById('main').appendChild(message);
-    
-      localStorage.setItem('noSpeed', speedLevel + 1);
-    
-      setTimeout(() => {
-        location.reload();
-      }, 2000); // 2 seconds delay
-    });
+  /* Pointer Events (Mouse + Touch + Pen) */
+  noBtn.addEventListener("pointerdown", () => isPaused = true);
+  noBtn.addEventListener("pointerup", () => isPaused = false);
+  noBtn.addEventListener("pointercancel", () => isPaused = false);
 
+  /* No button click */
+  noBtn.addEventListener("click", () => {
+    isPaused = true;
+    noBtn.style.display = "none";
 
-    yesBtn.addEventListener('click', () => {
-      main.style.display = 'none';
-      yayScreen.style.display = 'block';
-      localStorage.removeItem('noSpeed');
-    });
+    const message = document.createElement("h2");
+    message.textContent = "Wrong Answer. Start Again 😈";
+    message.style.color = "#c9184a";
+    message.style.marginTop = "20px";
+    main.appendChild(message);
 
-    // Hearts background
-    for (let i = 0; i < 20; i++) {
-      const heart = document.createElement('div');
-      heart.className = 'heart';
-      heart.textContent = '❤';
-      heart.style.left = Math.random() * 100 + 'vw';
-      heart.style.animationDuration = 6 + Math.random() * 6 + 's';
-      heart.style.fontSize = 1 + Math.random() * 1.5 + 'rem';
-      document.body.appendChild(heart);
-    }
-  </script>
+    localStorage.setItem("noSpeed", speedLevel + 1);
+
+    setTimeout(() => location.reload(), 1800);
+  });
+
+  /* Yes button */
+  yesBtn.addEventListener("click", () => {
+    main.style.display = "none";
+    yayScreen.style.display = "block";
+    localStorage.removeItem("noSpeed");
+  });
+
+  /* Handle resize & orientation changes */
+  window.addEventListener("resize", updateBounds);
+
+  /* Floating hearts (lightweight) */
+  for (let i = 0; i < 20; i++) {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = "❤";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.fontSize = (1 + Math.random() * 1.5) + "rem";
+    heart.style.animationDuration = (6 + Math.random() * 6) + "s";
+    document.body.appendChild(heart);
+  }
+
+  initPosition();
+  moveNo();
+</script>
+
 </body>
 </html>
