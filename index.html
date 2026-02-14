@@ -6,11 +6,7 @@
 <title>Valentine?</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-  }
-
+  * { box-sizing: border-box; font-family: Arial, sans-serif; }
   body {
     margin: 0;
     height: 100vh;
@@ -19,38 +15,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    transition: background 0.5s ease;
   }
-
-  .container {
-    text-align: center;
-    position: relative;
-    padding: 20px;
-  }
-
-  h1 {
-    font-size: clamp(1.8rem, 5vw, 3rem);
-    color: #c9184a;
-    margin-bottom: 20px;
-  }
-
-  .message {
-    font-size: 1.2rem;
-    color: #9d0208;
-    margin-bottom: 10px;
-    min-height: 30px;
-  }
-
-  .counter {
-    font-size: 0.9rem;
-    color: #6c757d;
-    margin-bottom: 20px;
-  }
-
-  .buttons {
-    position: relative;
-    height: 120px;
-  }
-
+  .container { text-align: center; position: relative; padding: 20px; }
+  h1 { font-size: clamp(1.8rem, 5vw, 3rem); color: #c9184a; margin-bottom: 20px; }
+  .message { font-size: 1.2rem; color: #9d0208; margin-bottom: 10px; min-height: 30px; }
+  .counter { font-size: 0.9rem; color: #6c757d; margin-bottom: 20px; }
+  .buttons { position: relative; height: 120px; }
   #yes {
     font-size: clamp(1.2rem, 4vw, 2.2rem);
     padding: 15px 40px;
@@ -61,8 +32,8 @@
     cursor: pointer;
     margin-right: 20px;
     box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
   }
-
   #no {
     font-size: 0.9rem;
     padding: 6px 12px;
@@ -72,45 +43,16 @@
     border-radius: 8px;
     cursor: pointer;
     position: fixed;
+    transition: transform 0.2s;
   }
-
-  #no, #yes {
-    touch-action: manipulation;
-  }
-
-  .yay {
-    display: none;
-    font-size: clamp(2rem, 6vw, 4rem);
-    color: #ff4d6d;
-    position: relative;
-  }
-
-  .confetti {
-    position: absolute;
-    top: 50%;
-    font-size: 2.5rem;
-    animation: pop 1.2s infinite ease-in-out;
-  }
-
+  #no,#yes { touch-action: manipulation; }
+  .yay { display: none; font-size: clamp(2rem,6vw,4rem); color:#ff4d6d; position: relative; }
+  .confetti { position: absolute; top:50%; font-size:2.5rem; animation: pop 1.2s infinite ease-in-out; }
   .confetti.left { left: -80px; }
   .confetti.right { right: -80px; }
-
-  @keyframes pop {
-    0% { transform: scale(1) rotate(0deg); }
-    50% { transform: scale(1.4) rotate(20deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-
-  .floating {
-    position: absolute;
-    opacity: 0.25;
-    animation: float linear infinite;
-  }
-
-  @keyframes float {
-    from { transform: translateY(100vh); }
-    to { transform: translateY(-10vh); }
-  }
+  @keyframes pop { 0%{transform:scale(1) rotate(0deg);} 50%{transform:scale(1.4) rotate(20deg);} 100%{transform:scale(1) rotate(0deg);} }
+  .floating { position: absolute; opacity:0.25; animation: float linear infinite; font-size:1.2rem; }
+  @keyframes float { from{transform:translateY(100vh);} to{transform:translateY(-10vh);} }
 </style>
 </head>
 <body>
@@ -132,126 +74,131 @@
 </div>
 
 <script>
-  const noBtn = document.getElementById('no');
-  const yesBtn = document.getElementById('yes');
-  const main = document.getElementById('main');
-  const yayScreen = document.getElementById('yayScreen');
-  const messageEl = document.getElementById('message');
-  const counterEl = document.getElementById('counter');
+const noBtn = document.getElementById('no');
+const yesBtn = document.getElementById('yes');
+const main = document.getElementById('main');
+const yayScreen = document.getElementById('yayScreen');
+const messageEl = document.getElementById('message');
+const counterEl = document.getElementById('counter');
 
-  let noCount = parseInt(localStorage.getItem("noCount")) || 0;
-  let dx = 1;
-  let dy = 1;
-  let x = 0;
-  let y = 0;
-  let maxX = 0;
-  let maxY = 0;
-  let isPaused = false;
-  let impossibleMode = false;
+let noCount = parseInt(localStorage.getItem("noCount")) || 0;
+let dx = 2;
+let dy = 2;
+let x = 0;
+let y = 0;
+let maxX = 0;
+let maxY = 0;
+let impossibleMode = false;
+let countdown = null;
+let countdownTime = 10;
 
-  const wrongMessages = [
-    "Are you sure? 😏",
-    "You're making a mistake 👀",
-    "That doesn't feel right 🤨",
-    "Hmm... try again 😌",
-    "Really? Think again 💭"
-  ];
+const wrongMessages = [
+  "Are you sure? 😏",
+  "You're making a mistake 👀",
+  "That doesn't feel right 🤨",
+  "Hmm... try again 😌",
+  "Really? Think again 💭"
+];
 
-  /* SOUND EFFECTS */
-  const sounds = [
-    new Audio("https://www.myinstants.com/media/sounds/cartoon-boing.mp3"),
-    new Audio("https://www.myinstants.com/media/sounds/fail-trombone.mp3"),
-    new Audio("https://www.myinstants.com/media/sounds/vine-boom.mp3")
-  ];
+const sounds = [
+  new Audio("https://www.myinstants.com/media/sounds/cartoon-boing.mp3"),
+  new Audio("https://www.myinstants.com/media/sounds/fail-trombone.mp3"),
+  new Audio("https://www.myinstants.com/media/sounds/vine-boom.mp3")
+];
 
-  function playRandomSound() {
-    const s = sounds[Math.floor(Math.random() * sounds.length)];
-    s.currentTime = 0;
-    s.play();
+function playRandomSound(){ const s=sounds[Math.floor(Math.random()*sounds.length)]; s.currentTime=0; s.play(); }
+function vibrate(){ if(navigator.vibrate) navigator.vibrate(150); }
+
+function updateBounds(){ maxX = window.innerWidth - noBtn.offsetWidth; maxY = window.innerHeight - noBtn.offsetHeight; }
+function initPosition(){ updateBounds(); x=Math.random()*maxX; y=Math.random()*maxY; }
+
+function moveNo(){
+  x += dx; y += dy;
+  if(x<=0||x>=maxX) dx*=-1;
+  if(y<=0||y>=maxY) dy*=-1;
+  noBtn.style.left = x+"px";
+  noBtn.style.top = y+"px";
+  requestAnimationFrame(moveNo);
+}
+
+noBtn.addEventListener("click",()=>{
+  noCount++;
+  localStorage.setItem("noCount",noCount);
+  playRandomSound(); vibrate();
+  messageEl.textContent=wrongMessages[noCount%wrongMessages.length];
+  counterEl.textContent=`You're on your ${noCount}${getOrdinal(noCount)} bad decision 😈`;
+
+  // Shrinking No / Growing Yes
+  noBtn.style.transform = `scale(${Math.max(0.5,1-noCount*0.05)})`;
+  yesBtn.style.transform = `scale(${1+noCount*0.03})`;
+
+  // Random teleport + spin
+  x=Math.random()*maxX; y=Math.random()*maxY;
+  noBtn.style.transform += ` rotate(${Math.random()*360}deg)`;
+
+  // Reverse psychology
+  if(noCount===5){
+    if(Math.random()<0.5){ yesBtn.textContent="No 🤯"; noBtn.textContent="Yes 😈"; }
   }
 
-  function vibrate() {
-    if (navigator.vibrate) {
-      navigator.vibrate(150);
-    }
-  }
-
-  function updateBounds() {
-    maxX = window.innerWidth - noBtn.offsetWidth;
-    maxY = window.innerHeight - noBtn.offsetHeight;
-  }
-
-  function initPosition() {
-    updateBounds();
-    x = Math.random() * maxX;
-    y = Math.random() * maxY;
-  }
-
-  function moveNo() {
-    if (!isPaused) {
-      x += dx;
-      y += dy;
-
-      if (x <= 0 || x >= maxX) dx *= -1;
-      if (y <= 0 || y >= maxY) dy *= -1;
-
-      noBtn.style.left = x + "px";
-      noBtn.style.top = y + "px";
-
-      if (impossibleMode) {
-        if (Math.random() < 0.02) {
-          dx = (Math.random() * 8) - 4;
-          dy = (Math.random() * 8) - 4;
-        }
+  // Countdown pressure after 5 NOs
+  if(noCount===5){
+    countdownTime=10;
+    countdown = setInterval(()=>{
+      document.title=`Hurry! ${countdownTime}s left ⏰`;
+      countdownTime--;
+      if(countdownTime<0){
+        clearInterval(countdown);
+        document.title="Too late! 😵";
+        spawnChaosParticles(20);
       }
-    }
-    requestAnimationFrame(moveNo);
+    },1000);
   }
 
-  noBtn.addEventListener("click", () => {
-    noCount++;
-    localStorage.setItem("noCount", noCount);
-
-    playRandomSound();
-    vibrate();
-
-    messageEl.textContent = wrongMessages[noCount % wrongMessages.length];
-    counterEl.textContent = `You're on your ${noCount}${getOrdinal(noCount)} bad decision 😈`;
-
-    if (noCount >= 3) startFloatingYes();
-    if (noCount >= 10) impossibleMode = true;
-  });
-
-  function getOrdinal(n) {
-    if (n % 10 == 1 && n % 100 != 11) return "st";
-    if (n % 10 == 2 && n % 100 != 12) return "nd";
-    if (n % 10 == 3 && n % 100 != 13) return "rd";
-    return "th";
+  // Meme madness after 10 NOs
+  if(noCount>=10){
+    impossibleMode=true;
+    spawnChaosParticles(50);
+    document.body.style.background=`linear-gradient(${Math.random()*360}deg,#ff4d6d,#ffd6e8,#ffafcc)`;
   }
+});
 
-  yesBtn.addEventListener("click", () => {
-    main.style.display = "none";
-    yayScreen.style.display = "block";
-    localStorage.removeItem("noCount");
-  });
-
-  function startFloatingYes() {
-    if (document.querySelectorAll(".floating").length > 0) return;
-    for (let i = 0; i < 25; i++) {
-      const el = document.createElement("div");
-      el.className = "floating";
-      el.textContent = "YES";
-      el.style.left = Math.random() * 100 + "vw";
-      el.style.fontSize = (1 + Math.random() * 1.5) + "rem";
-      el.style.animationDuration = (6 + Math.random() * 6) + "s";
-      document.body.appendChild(el);
-    }
+function spawnChaosParticles(num){
+  for(let i=0;i<num;i++){
+    const el=document.createElement("div");
+    el.className="floating";
+    const emojis=["💖","🔥","💀","💩","💋","🍕","🤣"];
+    el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left=Math.random()*100+"vw";
+    el.style.fontSize=(1+Math.random()*2)+"rem";
+    el.style.animationDuration=(3+Math.random()*5)+"s";
+    document.body.appendChild(el);
   }
+}
 
-  window.addEventListener("resize", updateBounds);
+function getOrdinal(n){ if(n%10==1 && n%100!=11) return"st"; if(n%10==2 && n%100!=12) return"nd"; if(n%10==3 && n%100!=13) return"rd"; return"th"; }
 
-  initPosition();
-  moveNo();
+yesBtn.addEventListener("click",()=>{
+  main.style.display="none"; yayScreen.style.display="block";
+  localStorage.removeItem("noCount");
+
+  // Celebration overload
+  spawnChaosParticles(50);
+  for(let i=0;i<20;i++){
+    const conf=document.createElement("div");
+    conf.className="confetti";
+    conf.style.left=Math.random()*window.innerWidth+"px";
+    conf.style.top=Math.random()*window.innerHeight+"px";
+    conf.textContent=["🎉","🎊","✨","💖"][Math.floor(Math.random()*4)];
+    document.body.appendChild(conf);
+  }
+  const cheer=new Audio("https://www.myinstants.com/media/sounds/tada-fanfare.mp3");
+  cheer.play();
+});
+
+window.addEventListener("resize",updateBounds);
+initPosition();
+moveNo();
 </script>
 
 </body>
