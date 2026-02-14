@@ -135,32 +135,45 @@
     let x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
     let y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
 
+    let isPaused = false;
+
+    noBtn.addEventListener('mouseenter', () => {
+      isPaused = true;
+    });
+    
+    noBtn.addEventListener('mouseleave', () => {
+      isPaused = false;
+    });
+
+
 
     function moveNo() {
       const maxX = window.innerWidth - noBtn.offsetWidth;
       const maxY = window.innerHeight - noBtn.offsetHeight;
     
-      x += dx;
-      y += dy;
+      if (!isPaused) {
+        x += dx;
+        y += dy;
     
-      if (x <= 0) {
-        x = 0;
-        dx *= -1;
-      }
+        if (x <= 0) {
+          x = 0;
+          dx *= -1;
+        }
     
-      if (x >= maxX) {
-        x = maxX;
-        dx *= -1;
-      }
+        if (x >= maxX) {
+          x = maxX;
+          dx *= -1;
+        }
     
-      if (y <= 0) {
-        y = 0;
-        dy *= -1;
-      }
+        if (y <= 0) {
+          y = 0;
+          dy *= -1;
+        }
     
-      if (y >= maxY) {
-        y = maxY;
-        dy *= -1;
+        if (y >= maxY) {
+          y = maxY;
+          dy *= -1;
+        }
       }
     
       noBtn.style.left = x + 'px';
@@ -172,9 +185,23 @@
     moveNo();
 
     noBtn.addEventListener('click', () => {
+      isPaused = true;
+      noBtn.style.display = 'none';
+    
+      const message = document.createElement('h2');
+      message.textContent = "Wrong Answer. Start Again 😈";
+      message.style.color = "#c9184a";
+      message.style.marginTop = "20px";
+    
+      document.getElementById('main').appendChild(message);
+    
       localStorage.setItem('noSpeed', speedLevel + 1);
-      location.reload();
+    
+      setTimeout(() => {
+        location.reload();
+      }, 2000); // 2 seconds delay
     });
+
 
     yesBtn.addEventListener('click', () => {
       main.style.display = 'none';
