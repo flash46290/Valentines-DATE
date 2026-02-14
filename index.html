@@ -4,62 +4,109 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Valentine?</title>
+
 <style>
-*{box-sizing:border-box;font-family:Arial,sans-serif;margin:0;padding:0;}
-body{
-  margin:0;
-  height:100vh;
-  background:linear-gradient(135deg,#ffd6e8,#fff0f6);
-  overflow:hidden;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  transition:background 0.5s ease;
-}
-.container{text-align:center;position:relative;padding:20px;}
-h1{font-size:clamp(1.8rem,5vw,3rem);color:#c9184a;margin-bottom:20px;}
-.message{font-size:1.2rem;color:#9d0208;margin-bottom:10px;min-height:30px;}
-.counter{font-size:0.9rem;color:#6c757d;margin-bottom:20px;}
-.buttons{position:relative;height:120px;}
-#yes{
-  font-size:clamp(1.2rem,4vw,2.2rem);
-  padding:15px 40px;
-  background-color:#ff4d6d;
-  color:white;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  margin-right:20px;
-  box-shadow:0 6px 15px rgba(0,0,0,0.15);
-  transition:transform 0.2s;
-}
-#no{
-  font-size:0.9rem;
-  padding:6px 12px;
-  background-color:#adb5bd;
-  color:white;
-  border:none;
-  border-radius:8px;
-  cursor:pointer;
-  position:fixed;
-  transition:transform 0.2s;
-}
-#no,#yes{touch-action:manipulation;}
-.yay{display:none;font-size:clamp(2rem,6vw,4rem);color:#ff4d6d;position:relative;}
-.confetti{position:absolute;top:50%;font-size:2.5rem;animation:pop 1.2s infinite ease-in-out;}
-.confetti.left{left:-80px;}
-.confetti.right{right:-80px;}
-@keyframes pop{0%{transform:scale(1) rotate(0deg);}50%{transform:scale(1.4) rotate(20deg);}100%{transform:scale(1) rotate(0deg);}}
-.floating{position:absolute;opacity:0.25;animation:float linear infinite;font-size:1.2rem;cursor:pointer;pointer-events:auto;}
-@keyframes float{from{transform:translateY(100vh);}to{transform:translateY(-10vh);}}
+  * {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+  }
+
+  body {
+    margin: 0;
+    height: 100vh;
+    background: linear-gradient(135deg, #ffd6e8, #fff0f6);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .container {
+    text-align: center;
+    position: relative;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: #c9184a;
+    margin-bottom: 40px;
+  }
+
+  .buttons {
+    position: relative;
+    height: 120px;
+  }
+
+  #yes {
+    font-size: clamp(1.2rem, 4vw, 2.2rem);
+    padding: 15px 40px;
+    background-color: #ff4d6d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-right: 20px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
+
+  #no {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+    background-color: #adb5bd;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    position: fixed;
+  }
+
+  /* Improve mobile tap responsiveness */
+  #no, #yes {
+    touch-action: manipulation;
+  }
+
+  /* YAAY screen */
+  .yay {
+    display: none;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: #ff4d6d;
+    position: relative;
+  }
+
+  .confetti {
+    position: absolute;
+    top: 50%;
+    font-size: 2.5rem;
+    animation: pop 1.2s infinite ease-in-out;
+  }
+
+  .confetti.left { left: -80px; }
+  .confetti.right { right: -80px; }
+
+  @keyframes pop {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.4) rotate(20deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  /* Floating hearts */
+  .heart {
+    position: absolute;
+    color: rgba(255, 77, 109, 0.25);
+    animation: float linear infinite;
+  }
+
+  @keyframes float {
+    from { transform: translateY(100vh); }
+    to { transform: translateY(-10vh); }
+  }
 </style>
 </head>
 <body>
 
 <div class="container" id="main">
   <h1>Will you be my Valentine? 💖</h1>
-  <div class="message" id="message"></div>
-  <div class="counter" id="counter"></div>
   <div class="buttons">
     <button id="yes">Yes</button>
     <button id="no">No</button>
@@ -73,112 +120,104 @@ h1{font-size:clamp(1.8rem,5vw,3rem);color:#c9184a;margin-bottom:20px;}
 </div>
 
 <script>
-const noBtn=document.getElementById('no');
-const yesBtn=document.getElementById('yes');
-const main=document.getElementById('main');
-const yayScreen=document.getElementById('yayScreen');
-const messageEl=document.getElementById('message');
-const counterEl=document.getElementById('counter');
+  const noBtn = document.getElementById('no');
+  const yesBtn = document.getElementById('yes');
+  const main = document.getElementById('main');
+  const yayScreen = document.getElementById('yayScreen');
 
-let noCount=parseInt(localStorage.getItem("noCount"))||0;
-let dx=2, dy=2, x=0, y=0, maxX=0, maxY=0;
-let floatingYesSizeFactor=1.2;
+  let speedLevel = parseInt(localStorage.getItem('noSpeed')) || 4;
+  let dx = 1.5 * speedLevel;
+  let dy = 1.5 * speedLevel;
 
-const wrongMessages=["Are you sure? 😏","You're making a mistake 👀","That doesn't feel right 🤨","Hmm... try again 😌","Really? Think again 💭"];
-const sounds=[
-  new Audio("https://www.myinstants.com/media/sounds/cartoon-boing.mp3"),
-  new Audio("https://www.myinstants.com/media/sounds/fail-trombone.mp3"),
-  new Audio("https://www.myinstants.com/media/sounds/vine-boom.mp3")
-];
+  let x = 0;
+  let y = 0;
+  let maxX = 0;
+  let maxY = 0;
+  let isPaused = false;
 
-function playRandomSound(){ const s=sounds[Math.floor(Math.random()*sounds.length)]; s.currentTime=0;s.play();}
-function vibrate(){if(navigator.vibrate) navigator.vibrate(150);}
-function updateBounds(){ maxX=window.innerWidth-noBtn.offsetWidth; maxY=window.innerHeight-noBtn.offsetHeight; }
-function initPosition(){updateBounds(); x=Math.random()*maxX; y=Math.random()*maxY;}
-function moveNo(){ 
-  x+=dx; y+=dy; 
-  if(x<=0||x>=maxX) dx*=-1; 
-  if(y<=0||y>=maxY) dy*=-1; 
-  noBtn.style.left=x+"px"; 
-  noBtn.style.top=y+"px"; 
-  requestAnimationFrame(moveNo);
-}
-function getOrdinal(n){ if(n%10==1&&n%100!=11)return"st"; if(n%10==2&&n%100!=12)return"nd"; if(n%10==3&&n%100!=13)return"rd"; return"th"; }
+  function updateBounds() {
+    maxX = window.innerWidth - noBtn.offsetWidth;
+    maxY = window.innerHeight - noBtn.offsetHeight;
 
-function startFloatingYes(){
-  const existing=document.querySelectorAll(".floating.yesFloating");
-  if(existing.length>0) return;
-  for(let i=0;i<25;i++){
-    const el=document.createElement("div");
-    el.className="floating yesFloating";
-    el.textContent="YES";
-    el.style.left=Math.random()*100+"vw";
-    el.style.fontSize=`${floatingYesSizeFactor + Math.random()*1.5}rem`;
-    el.style.animationDuration=(6+Math.random()*6)+"s";
-    document.body.appendChild(el);
-    el.addEventListener("click",()=>celebrate());
+    x = Math.min(Math.max(x, 0), maxX);
+    y = Math.min(Math.max(y, 0), maxY);
   }
-}
 
-function celebrate(){
-  document.querySelectorAll(".floating").forEach(el=>el.remove());
-  main.style.display="none";
-  yayScreen.style.display="block";
+  function initPosition() {
+    updateBounds();
+    x = Math.random() * maxX;
+    y = Math.random() * maxY;
+    noBtn.style.left = x + "px";
+    noBtn.style.top = y + "px";
+  }
 
-  let confettiInterval=setInterval(()=>{
-    for(let i=0;i<20;i++){
-      const conf=document.createElement("div");
-      conf.className="confetti";
-      conf.style.left=Math.random()*window.innerWidth+"px";
-      conf.style.top=Math.random()*window.innerHeight+"px";
-      conf.textContent=["🎉","🎊","✨","💖"][Math.floor(Math.random()*4)];
-      document.body.appendChild(conf);
+  function moveNo() {
+    if (!isPaused) {
+      x += dx;
+      y += dy;
+
+      if (x <= 0 || x >= maxX) {
+        dx *= -1;
+        x = Math.min(Math.max(x, 0), maxX);
+      }
+
+      if (y <= 0 || y >= maxY) {
+        dy *= -1;
+        y = Math.min(Math.max(y, 0), maxY);
+      }
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top = y + "px";
     }
-  },200);
 
-  const cheer=new Audio("https://www.myinstants.com/media/sounds/tada-fanfare.mp3");
-  cheer.play();
+    requestAnimationFrame(moveNo);
+  }
 
-  setTimeout(()=>clearInterval(confettiInterval),10000); // celebration overload for 10s
+  /* Pointer Events (Mouse + Touch + Pen) */
+  noBtn.addEventListener("pointerdown", () => isPaused = true);
+  noBtn.addEventListener("pointerup", () => isPaused = false);
+  noBtn.addEventListener("pointercancel", () => isPaused = false);
 
-  localStorage.removeItem("noCount");
-}
+  /* No button click */
+  noBtn.addEventListener("click", () => {
+    isPaused = true;
+    noBtn.style.display = "none";
 
-// NO click logic
-noBtn.addEventListener("click",()=>{
-  noCount++;
-  localStorage.setItem("noCount",noCount);
-  playRandomSound();
-  vibrate();
-  messageEl.textContent=wrongMessages[noCount%wrongMessages.length];
-  counterEl.textContent=`You're on your ${noCount}${getOrdinal(noCount)} bad decision 😈`;
+    const message = document.createElement("h2");
+    message.textContent = "Wrong Answer. Start Again 😈";
+    message.style.color = "#c9184a";
+    message.style.marginTop = "20px";
+    main.appendChild(message);
 
-  // Shrinking No / Growing Yes
-  noBtn.style.transform=`scale(${Math.max(0.5,1-noCount*0.05)}) rotate(${Math.random()*360}deg)`;
-  yesBtn.style.transform=`scale(${1+noCount*0.05})`;
+    localStorage.setItem("noSpeed", speedLevel + 1);
 
-  // Increase NO speed slightly
-  dx *= 1.05; dy *= 1.05;
-
-  // Teleport
-  x=Math.random()*maxX; y=Math.random()*maxY;
-  noBtn.style.left=x+"px"; noBtn.style.top=y+"px";
-
-  // Floating YES after 3 NOs
-  if(noCount>=3) startFloatingYes();
-  
-  // Floating YES grows slowly over time
-  document.querySelectorAll(".yesFloating").forEach(el=>{
-    const size=parseFloat(el.style.fontSize)||1;
-    el.style.fontSize=`${size*1.03}rem`;
+    setTimeout(() => location.reload(), 1800);
   });
-});
 
-yesBtn.addEventListener("click",()=>celebrate());
+  /* Yes button */
+  yesBtn.addEventListener("click", () => {
+    main.style.display = "none";
+    yayScreen.style.display = "block";
+    localStorage.removeItem("noSpeed");
+  });
 
-window.addEventListener("resize",updateBounds);
-initPosition();
-moveNo();
+  /* Handle resize & orientation changes */
+  window.addEventListener("resize", updateBounds);
+
+  /* Floating hearts (lightweight) */
+  for (let i = 0; i < 20; i++) {
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = "❤";
+    heart.style.left = Math.random() * 100 + "vw";
+    heart.style.fontSize = (1 + Math.random() * 1.5) + "rem";
+    heart.style.animationDuration = (6 + Math.random() * 6) + "s";
+    document.body.appendChild(heart);
+  }
+
+  initPosition();
+  moveNo();
 </script>
+
 </body>
 </html>
